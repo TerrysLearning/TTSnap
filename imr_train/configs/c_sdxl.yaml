@@ -1,0 +1,64 @@
+seed: 2000
+log: 
+  project: Debug_IMR
+  name: try
+  use_wandb: false
+  save_checkpoint: true
+  print_loss_every_iter: 1
+  valid_every_epoch: 1
+  plot_dir: outputs
+  do_valid: false 
+  second_valid: false
+  valid2_every_epoch: 1
+  checkpoint_dir: checkpoints
+  save_checkpoint: False
+  eval_start: false
+time_config:
+  step_targets:  [6,5,4,3,2,1,0] # if range 0-19   [14,13,12,11,10,9,8,7,6,5,4,3,2,1,0]
+data:
+  train_gt_file: setup/reward_gt_sdxl_train_5k.yaml
+  train_data_folder: data_sdxl_train
+  train_prompts_file: setup/dataset_prompts_train.json
+  train_prompt_range: 5000 # 2 for top 2 prompts, etc.
+  train_num_per_prompt: 8 
+  valid_gt_file: setup/reward_gt_sdxl_val_i80.yaml
+  valid_data_folder: data_sdxl_val
+  valid_prompts_file: setup/dataset_prompts_validation.json
+  valid_prompt_range: 200
+  valid_num_per_prompt: 80
+  valid2_gt_file: setup/reward_gt_sdxl_train_5k.yaml
+  valid2_data_folder: data_sdxl_train_4k
+  valid2_prompts_file: setup/dataset_prompts_train.json
+  valid2_prompt_range: 500
+  valid2_num_per_prompt: 8
+  train_mean_file: setup/step_mean_2k_noarg.json #-- to be updated
+  train_std_file: setup/step_std_2k_noarg.json #-- to be updated
+train:
+  base_model_path: checkpoints/XL/Ct7.pt #./checkpoints/flux5000/Ct2.pt # ./ImageReward.pt #/home/u6839880/.cache/ImageReward/ImageReward.pt
+  batch_size: 100
+  accum_steps: 1
+  adam_beta1: 0.9
+  adam_beta2: 0.999
+  adam_eps: 1.0e-08
+  lr: 3.0e-6
+  min_lr_scale: 0.5
+  max_grad_norm: 5.0
+  scheduler_type: linear # or cosine or linear
+  warmup_ratio: 0.0
+  warmup_type: linear # or constant
+  time_sample_strategy: 1 # 0: random each batch, 1: random inside batch, 2: fixed time_id
+  vit_type: vit_normal # vit_timecond, vit_normal, vit_adaln
+  curr_interval: 1
+  loss_mse_uncertainty_scale: 0.0
+  loss_mse_scale: 1.0
+  loss_conf_scale: 0.0
+  loss_preference_scale: 0.0
+  loss_preference_tau: 0.5
+  loss_repa_scale: 0.0
+  base_model_time: 19 
+  shift_mean: false
+  scale_std: false
+  bn_before_loss: false 
+  high_lr_uncertainty: false
+  epochs: -1  # for single and multi only
+  weight_decay: 0.01
