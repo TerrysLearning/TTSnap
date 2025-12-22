@@ -56,7 +56,6 @@ The code for training the reward models are in the folder reward_train.
 ```
 conda create --n reward python=3.10.18
 pip install image-reward
-pip install wandb
 pip install peft
 pip install transformers==4.53.1
 pip install matplotlib
@@ -76,10 +75,10 @@ accelerate launch --num_processes=<Number of your GPUs> train_cur.py \
 Other arguments can be specified in the config file or add in the command lines
 
 ## Run the TTSnap Simulation
+This part is to test and compare the performance TTSnap under the same set of generate trajectories.  
+
 
 ## Run TTSnap
-
-
 
 **TODO:** 
 - [ ] release the code for training HPS and Training 
