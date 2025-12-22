@@ -1,8 +1,9 @@
 # TTSnap
 The official implementation of TTSnap.
+More and more will be updated 
 
 ## Introduction
-
+We increase the efficiency of global search method for Test Time Scaling on Text to Image diffusion models, e.g. best-of-n. 
 
 ## Generate Data
 
