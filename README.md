@@ -51,9 +51,9 @@ We use our self-distillation strategy to finetune the reward model.
 
 Given the datafolder of the generated images, their prompts and their reward values, we train the noise-aware reward model for each inference step.
 
-The code for training the reward models are in the folder reward_train. 
 
-**Environment setup:**
+
+**Environment Setup:**
 ```
 conda create --n reward python=3.10.18
 pip install image-reward
@@ -64,8 +64,17 @@ pip install scipy
 pip install accelerate
 pip install clint ftfy
 ```
+
+**Checkpoints download**
+Original reward model checkpoints before finetuning: [link](https://drive.google.com/drive/folders/1Vzlba2rBCAEi9rUG_wrmttIfKGaLE1mk?usp=drive_link)
+
+Reward checkpoints after finetuning: 
+
 **Run the code:** 
-To train the image-reward model
+Modify the location of the datafolder and checkpoint path in the config file, e.g. c_flux.yaml. 
+You can also use only part of data to train by modifying: *train_prompt_range*,  *train_num_per_prompt*. 
+
+To train the image-reward model:
 ```
 cd imr_train
 accelerate launch --num_processes=<Number of your GPUs> train_cur.py \
@@ -75,14 +84,8 @@ accelerate launch --num_processes=<Number of your GPUs> train_cur.py \
 ```
 Other arguments can be specified in the config file or add in the command lines
 
-**Checkpoints download**
-Original reward model checkpoints before finetuning: [link](https://drive.google.com/drive/folders/1Vzlba2rBCAEi9rUG_wrmttIfKGaLE1mk?usp=drive_link)
-
-Reward checkpoints after finetuning: 
-
 ## Run the TTSnap Simulation
 This part is to test and compare the performance TTSnap under the same set of generate trajectories.  
-
 
 ## Run TTSnap
 
@@ -90,8 +93,8 @@ This part is to test and compare the performance TTSnap under the same set of ge
 - [ ] release the code for training HPS and Training 
 - [ ] release the code for TTSnap simulation
 - [ ] release the code for TTSnap run
-- [ ] link for the ImageReward Checkpoint
-- [ ] remove the useless part
 - [ ] add the base model for pickscore
+- [ ] link for trained checkpoints
+- [ ] link for data
 
 
