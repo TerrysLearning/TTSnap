@@ -75,6 +75,11 @@ accelerate launch --num_processes=<Number of your GPUs> train_cur.py \
 ```
 Other arguments can be specified in the config file or add in the command lines
 
+**Checkpoints download**
+Original reward model checkpoints before finetuning: [link](https://drive.google.com/drive/folders/1Vzlba2rBCAEi9rUG_wrmttIfKGaLE1mk?usp=drive_link)
+
+Reward checkpoints after finetuning: 
+
 ## Run the TTSnap Simulation
 This part is to test and compare the performance TTSnap under the same set of generate trajectories.  
 
@@ -85,5 +90,8 @@ This part is to test and compare the performance TTSnap under the same set of ge
 - [ ] release the code for training HPS and Training 
 - [ ] release the code for TTSnap simulation
 - [ ] release the code for TTSnap run
+- [ ] link for the ImageReward Checkpoint
+- [ ] remove the useless part
+- [ ] add the base model for pickscore
 
 
