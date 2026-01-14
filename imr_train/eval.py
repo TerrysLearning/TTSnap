@@ -6,7 +6,7 @@ from dataset import load_image_batch
 import wandb
 import matplotlib.pyplot as plt
 import json
-from scipy.stats import spearmanr, kendalltau
+from scipy.stats import kendalltau
 
 
 # ------ Evaluation Functions ------
@@ -52,18 +52,10 @@ def evaluate(model, dataloader, t_target, args_train, message="Evaluating", **kw
                 batch_pred = model(batch_data)
                 reward_pred = batch_pred['reward_pred']
                 reward_gt = batch_data['reward_gt']
-                # if args_train['shift_mean']:
-                #     reward_gt -= kwargs['step_mean'][args_train['base_model_time']].to(reward_gt.device)
-                #     reward_pred -= kwargs['step_mean'][batch_data['t_id']].unsqueeze(1).to(reward_pred.device)
-                # if args_train['scale_std']:
-                #     reward_gt /= (kwargs['step_std'][args_train['base_model_time']].to(reward_gt.device) + 1e-10)
-                #     reward_pred /= (kwargs['step_std'][batch_data['t_id']].unsqueeze(1).to(reward_pred.device) + 1e-10)
                 eval_prompts.extend(batch_data['p_id'].tolist())
                 eval_times.extend(t_id_batch.tolist())
                 eval_preds.extend(reward_pred.squeeze(1).tolist())
                 eval_gts.extend(reward_gt.tolist())
-    if args_train["loss_conf_scale"] > 0 or args_train["loss_mse_uncertainty_scale"] > 0:
-        print('Sigma pred mean:', np.mean(eval_stds), ' Sigma pred std:', np.std(eval_stds))
     return eval_times, eval_prompts, eval_preds, eval_gts
 
 
@@ -89,7 +81,6 @@ def stat(eval_times, eval_prompts, eval_preds, eval_gts):
         out_gt[t_id][p_id].append(gt)
 
     output_dict = {}
-    outputs_spearman = {}
     outputs_kendall = {}
     outputs_mse = {}
     outputs_top_select_acc = {}
@@ -99,7 +90,6 @@ def stat(eval_times, eval_prompts, eval_preds, eval_gts):
     
 
     for t_id in out_pred.keys():
-        spear_per_p = []
         kendall_per_p = []
         mse_per_p = []
         top_select_acc_per_p = []
@@ -109,7 +99,6 @@ def stat(eval_times, eval_prompts, eval_preds, eval_gts):
         for p_id in out_pred[t_id].keys():
             pred_array = np.array(out_pred[t_id][p_id])
             gt_array = np.array(out_gt[t_id][p_id])
-            spear_per_p.append(spearmanr(pred_array, gt_array)[0])
             kendall_per_p.append(kendalltau(pred_array, gt_array)[0])
             mse_per_p.append(np.mean((pred_array - gt_array)**2))
             top_select_acc, top_select_gap = top_select_eval_M(pred_array, gt_array)
@@ -119,7 +108,6 @@ def stat(eval_times, eval_prompts, eval_preds, eval_gts):
             top_select_acc_given_per_p.append(top_select_acc_given)
             top_select_gap_given_per_p.append(top_select_gap_given)
 
-        outputs_spearman[t_id] = np.array(spear_per_p).mean()
         outputs_kendall[t_id] = np.array(kendall_per_p).mean()
         outputs_mse[t_id] = np.array(mse_per_p).mean()
         outputs_top_select_acc[t_id] = np.array(top_select_acc_per_p).mean()
@@ -127,9 +115,6 @@ def stat(eval_times, eval_prompts, eval_preds, eval_gts):
         outputs_top_select_acc_given[t_id] = np.array(top_select_acc_given_per_p).mean()
         outputs_top_select_gap_given[t_id] = np.array(top_select_gap_given_per_p).mean()
 
-        # print(f"time_id = {t_id:2d} |" +
-        #     f"Tacc: {outputs_top_select_acc[t_id]:.4f} Tgap: {outputs_top_select_gap[t_id]:.6f} | " +
-        #     f"Spear: {outputs_spearman[t_id]:.4f} | Ken: {outputs_kendall[t_id]:.4f} | MSE: {outputs_mse[t_id]:.6f}")
         print(f"time_id = {t_id:2d} |" +
             f"Tacc: {outputs_top_select_acc[t_id]:.4f} Tgap: {outputs_top_select_gap[t_id]:.6f} | " +
             f"Ken: {outputs_kendall[t_id]:.4f} | " +
@@ -137,7 +122,6 @@ def stat(eval_times, eval_prompts, eval_preds, eval_gts):
             f"Tacc_25: {outputs_top_select_acc_given[t_id]:.4f} | Tgap_25: {outputs_top_select_gap_given[t_id]:.6f}")
 
     output_dict = {
-        'spearman': outputs_spearman,
         'kendall': outputs_kendall,
         'mse': outputs_mse,
         'Tacc': outputs_top_select_acc,

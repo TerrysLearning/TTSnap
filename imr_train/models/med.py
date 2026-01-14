@@ -399,7 +399,6 @@ class BertEncoder(nn.Module):
         output_hidden_states=False,
         return_dict=True,
         mode='multimodal',
-        output_feature=False,
     ):
         all_hidden_states = () if output_hidden_states else None
         all_self_attentions = () if output_attentions else None
@@ -407,7 +406,6 @@ class BertEncoder(nn.Module):
 
         next_decoder_cache = () if use_cache else None
         
-        block_features = [] #/////
         for i in range(self.config.num_hidden_layers):
             layer_module = self.layer[i]
             if output_hidden_states:
@@ -451,10 +449,7 @@ class BertEncoder(nn.Module):
                     mode=mode,
                 )
 
-
             hidden_states = layer_outputs[0]
-            if output_feature:
-                block_features.append(hidden_states) #/////
 
             if use_cache:
                 next_decoder_cache += (layer_outputs[-1],)
@@ -476,19 +471,13 @@ class BertEncoder(nn.Module):
                 ]
                 if v is not None
             )
-        # ///////
-        if output_feature:
-            block_features = torch.cat(block_features, dim=0) # 12 * 35 * 768 
-        else: 
-            block_features = None
-
         return BaseModelOutputWithPastAndCrossAttentions(
             last_hidden_state=hidden_states,
             past_key_values=next_decoder_cache,
             hidden_states=all_hidden_states,
             attentions=all_self_attentions,
             cross_attentions=all_cross_attentions,
-        ), block_features #/////
+        )
 
 
 class BertPooler(nn.Module):
@@ -693,7 +682,6 @@ class BertModel(BertPreTrainedModel):
         return_dict=None,
         is_decoder=False,
         mode='multimodal',
-        output_feature=False,
     ):
         r"""
         encoder_hidden_states  (:obj:`torch.FloatTensor` of shape :obj:`(batch_size, sequence_length, hidden_size)`, `optional`):
@@ -788,7 +776,7 @@ class BertModel(BertPreTrainedModel):
         else:
             embedding_output = encoder_embeds
             
-        encoder_outputs, block_features = self.encoder(
+        encoder_outputs = self.encoder(
             embedding_output,
             attention_mask=extended_attention_mask,
             head_mask=head_mask,
@@ -800,7 +788,6 @@ class BertModel(BertPreTrainedModel):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
             mode=mode,
-            output_feature=output_feature,
         )
         sequence_output = encoder_outputs[0]
         pooled_output = self.pooler(sequence_output) if self.pooler is not None else None
@@ -815,7 +802,7 @@ class BertModel(BertPreTrainedModel):
             hidden_states=encoder_outputs.hidden_states,
             attentions=encoder_outputs.attentions,
             cross_attentions=encoder_outputs.cross_attentions,
-        ), block_features #/////
+        )
 
 
 

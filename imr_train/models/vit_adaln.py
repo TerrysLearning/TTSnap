@@ -217,7 +217,7 @@ class VisionTransformer(nn.Module):
     def no_weight_decay(self):
         return {'pos_embed', 'cls_token'}
 
-    def forward(self, x, timestep, register_blk=-1, output_feature=False): #/////
+    def forward(self, x, timestep, register_blk=-1): #/////
         B = x.shape[0]
         x = self.patch_embed(x)
 
@@ -228,23 +228,15 @@ class VisionTransformer(nn.Module):
         x = self.pos_drop(x)
 
         time_cond = None
-        block_features = [] #/////
         for i,blk in enumerate(self.blocks):
             x = blk(x, time_cond, register_blk==i)
-            if output_feature:
-                block_features.append(x) #/////
         x = self.norm(x)
 
         shift = self.shift.unsqueeze(0).unsqueeze(0)
         scale = self.scale.unsqueeze(0).unsqueeze(0)
         x = modulate(x, shift, scale)
         # x = x * (1 + self.shift) + self.scale
-
-        if output_feature:
-            block_features = torch.cat(block_features, dim=0) #///// 24 * 197 * 1024
-            return x, block_features #///////
-        else:
-            return x, None
+        return x, None
 
     @torch.jit.ignore()
     def load_pretrained(self, checkpoint_path, prefix=''):

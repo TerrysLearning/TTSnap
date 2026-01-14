@@ -72,8 +72,7 @@ if __name__ == "__main__":
         
     train_dataset, train_loader = setup_dataset('train', batch_size=batch_size_train, use_pair=use_pair)
     valid_dataset, valid_loader = setup_dataset('valid', batch_size=args_train['batch_size'], use_pair=use_pair)
-    if args_log['second_valid']:
-        valid2_dataset, valid2_loader = setup_dataset('valid2', batch_size=args_train['batch_size'], use_pair=use_pair)
+   
 
     # setup the model
     model = ImageReward_Model(config_model_path, args_train['vit_type'], device).to(device)
@@ -83,11 +82,6 @@ if __name__ == "__main__":
     print("missing keys:", missing)
     print("unexpected keys:", unexpected)
     model.requires_grad_(True)
-    
-    if args_train['loss_mse_uncertainty_scale'] > 0 or args_train['loss_conf_scale'] > 0:
-        model.uncertainty_head.requires_grad_(True)
-    else:
-        model.uncertainty_head.requires_grad_(False)
 
     ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
     accelerator = Accelerator(gradient_accumulation_steps=args_train['accum_steps'], kwargs_handlers=[ddp_kwargs])    
@@ -114,19 +108,19 @@ if __name__ == "__main__":
         return history
 
     valid_every_step = args_log['valid_every_epoch'] * len(train_loader)
-    valid2_every_step = args_log['valid2_every_epoch'] * len(train_loader)
 
     last_time_lr_scale = 1.0 # control the decay of initial lr for each time step in curriculum learning
     step_targets = torch.tensor(config_dict['time_config']['step_targets']).long()
     step_targets, _ = torch.sort(step_targets, descending=True)
 
-    if accelerator.is_main_process:
-        trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        print(f"trainable_params: {trainable_params}")  
-        write_down_trainable_modules(model)
-        print_dict(args_data)
-        print_dict(args_log)
-        print_dict(args_train)
+    # Output the parameters number of the model and save the model structure
+    # if accelerator.is_main_process:
+    #     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    #     print(f"params: { params}")  
+    #     write_down_modules(model)
+    #     print_dict(args_data)
+    #     print_dict(args_log)
+    #     print_dict(args_train)
 
 
     if args_log['eval_start']:
@@ -134,9 +128,6 @@ if __name__ == "__main__":
             for s in step_targets.tolist():
                 time_id = torch.tensor([s]).long()
                 history = validate(valid_loader, history, t_target= time_id, message="valid", epoch=0)
-        if args_log['second_valid']:
-            time_id = torch.tensor([step_targets[0]]).long()
-            history = validate(valid2_loader, history, t_target= time_id, message="valid2", epoch=0)
 
     epochs_pass = 0 
     for i, time_id in enumerate(step_targets):
@@ -152,6 +143,12 @@ if __name__ == "__main__":
             print("#################################################")
             print("Training for time step:", time_id.item())
             print("Initial learning rate for this time step:", lr_start)
+        
+        # ///// Free the memory, otherwise OOM may happen
+        if i > 0: 
+            del optimizer, scheduler
+            accelerator.free_memory()
+        # /////
 
         optimizer = torch.optim.AdamW(model.parameters(), 
                     lr=lr_start, 
@@ -206,9 +203,6 @@ if __name__ == "__main__":
             epochs_pass += 1
             if args_log['do_valid'] and (epochs_pass) % args_log['valid_every_epoch'] == 0:
                 history = validate(valid_loader, history, t_target= time_id, message="valid", epoch=epoch)
-
-            if args_log['second_valid'] and (epochs_pass) % args_log['valid2_every_epoch'] == 0:
-                history = validate(valid2_loader, history, t_target= time_id, message="valid2", epoch=epoch)
 
             if accelerator.is_main_process and args_log['save_checkpoint']:
                 state_dict = accelerator.get_state_dict(model)
