@@ -90,10 +90,8 @@ This part is to test and compare the performance TTSnap under the same set of ge
 ## Run TTSnap
 
 **TODO:** 
-- [ ] release the code for training HPS and Training 
 - [ ] release the code for TTSnap simulation
 - [ ] release the code for TTSnap run
-- [ ] add the base model for pickscore
 - [ ] link for trained checkpoints
 - [ ] link for data
 
