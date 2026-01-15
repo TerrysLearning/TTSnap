@@ -46,14 +46,14 @@ def evaluate(model, dataloader, t_target, args_train, message="Evaluating", **kw
         for t_id in t_target.tolist():
             for batch_data in tqdm(dataloader, desc=message+' time_id = '+str(t_id)):
                 t_id_batch = torch.tensor([t_id]*len(batch_data['img_id']))
-                batch_data['image'] = load_image_batch(dataloader.dataset, batch_data['img_id'], batch_data['p_id'], t_id_batch)
+                batch_data['image'] = load_image_batch(dataloader.dataset, batch_data['img_id'], batch_data['p_id'], t_id_batch).to(model.device)
                 batch_data['t_id'] = t_id_batch
                 batch_pred = model(batch_data)
                 reward_pred = batch_pred['reward_pred']
                 reward_gt = batch_data['reward_gt']
                 eval_prompts.extend(batch_data['p_id'].tolist())
                 eval_times.extend(t_id_batch.tolist())
-                eval_preds.extend(reward_pred.squeeze(1).tolist())
+                eval_preds.extend(reward_pred.tolist())
                 eval_gts.extend(reward_gt.tolist())
     return eval_times, eval_prompts, eval_preds, eval_gts
 

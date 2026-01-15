@@ -2,10 +2,9 @@
 The official implementation of TTSnap.
 More and more will be updated soon. 
 
-## Introduction
 We increase the efficiency of global search method for Test Time Scaling on Text to Image diffusion models, e.g. best-of-n. 
 
-## Generate Data
+## 1. Generate Data
 
 Given a set of prompts saved in json file, we generate images per-prompt using NegToMe. 
 
@@ -45,13 +44,11 @@ pip install diffusers
 python gen_flux.py
 ```
 
-## Train the Reward Model
+## 2. Train the Reward Model
 
 We use our self-distillation strategy to finetune the reward model.
 
 Given the datafolder of the generated images, their prompts and their reward values, we train the noise-aware reward model for each inference step.
-
-
 
 **Environment Setup:**
 ```
@@ -84,10 +81,10 @@ accelerate launch --num_processes=<Number of your GPUs> train_cur.py \
 ```
 Other arguments can be specified in the config file or add in the command lines
 
-## Run the TTSnap Simulation
+## 3. Run the TTSnap Simulation
 This part is to test and compare the performance TTSnap under the same set of generate trajectories.  
 
-## Run TTSnap
+## 4. Run TTSnap
 
 **TODO:** 
 - [ ] release the code for TTSnap simulation
@@ -95,4 +92,13 @@ This part is to test and compare the performance TTSnap under the same set of ge
 - [ ] link for trained checkpoints
 - [ ] link for data
 
+If you find our work useful, please cite: 
+```
+@article{yu2025ttsnap,
+  title={TTSnap: Test-Time Scaling of Diffusion Models via Noise-Aware Pruning},
+  author={Yu, Qingtao and Song, Changlin and Sun, Minghao and Yu, Zhengyang and Verma, Vinay Kumar and Roy, Soumya and Negi, Sumit and Li, Hongdong and Campbell, Dylan},
+  journal={arXiv preprint arXiv:2511.22242},
+  year={2025}
+}
+```
 
