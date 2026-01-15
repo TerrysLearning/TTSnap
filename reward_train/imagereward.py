@@ -4,11 +4,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from PIL import Image
-from models.blip_pretrain import BLIP_Pretrain
+from ImageReward_models.blip_pretrain import BLIP_Pretrain
 from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize
 import yaml
 from utils import _transform, init_tokenizer
-
 
 
 class MLP(nn.Module):
@@ -44,29 +43,32 @@ class MLP(nn.Module):
 
 
 class ImageReward_Model(nn.Module):
-    def __init__(self, config_path, vit_type='vit_normal', device='cpu'):
+    def __init__(self, config_path, vit_type='vit_normal'):
         super().__init__()
         # I think this part can be better organized /////
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
-        self.device = device
         
         self.blip = BLIP_Pretrain(image_size=224, vit='large', med_config='setup/med_config.json', vit_type=vit_type)
         self.preprocess = _transform(config['BLIP']['image_size'])
         self.mlp = MLP(config['ImageReward']['mlp_dim'])
+        self.tokenizer = init_tokenizer()
         # use the same MLP to predict the uncertainty of the reward
         # self.mean = 0.16717362830052426
         # self.std = 1.0333394966054072
 
-    def encode_single(self, text_ids, text_mask, image, noise_level):
-        text_ids = text_ids.view(text_ids.shape[0], -1).to(self.device) # [batch_size, seq_len]
-        text_mask = text_mask.view(text_mask.shape[0], -1).to(self.device) # [batch_size, seq_len]
-        image = image.to(self.device) # [batch_size, C, H, W]
-        noise_level = noise_level.to(self.device)
+    def encode_single(self, image, prompt, noise_level):
+        
+        text_input = self.tokenizer(prompt, padding='max_length', 
+                        truncation=True, max_length=35, return_tensors="pt")
+        text_ids = text_input.input_ids.to(image.device)
+        text_mask = text_input.attention_mask.to(image.device)
+
+        noise_level = noise_level.to(image.device)
         
         # encode image
         image_embeds = self.blip.visual_encoder(image, noise_level)
-        image_atts = torch.ones(image_embeds.size()[:-1], dtype=torch.long).to(self.device)
+        image_atts = torch.ones(image_embeds.size()[:-1], dtype=torch.long).to(image.device)
         # encode text
         emb_text = self.blip.text_encoder(text_ids,
                                             attention_mask = text_mask,
@@ -82,10 +84,10 @@ class ImageReward_Model(nn.Module):
  
     def forward(self, batch_data):
         # encode pair
-        model_output = self.encode_single(batch_data['text_ids'], batch_data['text_mask'], batch_data['image'], batch_data['t_id'])
+        model_output = self.encode_single(batch_data['image'], batch_data['prompt'], batch_data['t_id'])
         # forward
         last_emb = model_output['last_emb']
-        reward = self.mlp(last_emb)
+        reward = self.mlp(last_emb).squeeze(-1)
         batch_data = {
             'reward_pred': reward,
         }

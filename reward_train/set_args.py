@@ -14,6 +14,8 @@ def set_args():
     args_train = config_dict['train']
     args_log = config_dict['log']
     
+    parser.add_argument("--reward_name", type=str, default=config_dict['reward_name'])
+
     parser.add_argument("--plot_dir", type=str, default=args_log['plot_dir'])
     parser.add_argument("--save_checkpoint", action="store_true", default=args_log['save_checkpoint'])
     parser.add_argument("--checkpoint_dir", type=str, default=args_log['checkpoint_dir'])
@@ -51,6 +53,7 @@ def set_args():
     if args.save_checkpoint:
         os.makedirs(args.checkpoint_dir, exist_ok=True)
     
+    config_dict['reward_name'] = args.reward_name
     config_dict['time_config']['step_targets'] = [int(i) for i in args.step_targets.strip('[]').split(',')]
 
     args_train['base_model_path'] = args.base_model_path

@@ -1,6 +1,6 @@
+reward_name: imr # [imr, pick, hps] 
 seed: 2000
 log: 
-  project: Debug_IMR
   name: try
   use_wandb: false
   save_checkpoint: true
@@ -17,7 +17,7 @@ data:
   train_gt_file: setup/reward_gt_flux_5k.yaml
   train_data_folder: data_flux_train 
   train_prompts_file: setup/dataset_prompts_train.json
-  train_prompt_range: 10 # 2 for top 2 prompts, etc.
+  train_prompt_range: 16 # 2 for top 2 prompts, etc.
   train_num_per_prompt: 8 # number images per prompt 
   valid_gt_file: setup/reward_gt_flux_val_i88.yaml 
   valid_data_folder: data_flux_val  
@@ -25,7 +25,7 @@ data:
   valid_prompt_range: 200
   valid_num_per_prompt: 80
 train:
-  base_model_path: checkpoints/ImageReward.pt
+  base_model_path: checkpoints/ImageReward.pt 
   batch_size: 100
   accum_steps: 1
   adam_beta1: 0.9
@@ -38,7 +38,7 @@ train:
   warmup_ratio: 0.0
   warmup_type: linear # or constant
   time_sample_strategy: 1 # 0: random each batch, 1: random inside batch, 2: fixed time_id
-  vit_type: vit_normal # vit_timecond, vit_normal, vit_adaln
+  vit_type: vit_normal # [vit_timecond, vit_normal, vit_adaln] Only implemented for ImageReward for Ablation only
   curr_interval: 1 # number of epochs per curriculum step
   loss_mse_scale: 1.0
   loss_preference_scale: 0.0

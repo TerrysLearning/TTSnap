@@ -5,10 +5,10 @@
 import warnings
 warnings.filterwarnings("ignore")
 
-from models.vit import interpolate_pos_embed
-from models.vit_timecond import VisionTransformer as ViT_timecond
-from models.vit import VisionTransformer as ViT_normal
-from models.vit_adaln import VisionTransformer as ViT_adaln
+from ImageReward_models.vit import interpolate_pos_embed 
+from ImageReward_models.vit_timecond import VisionTransformer as ViT_timecond
+from ImageReward_models.vit import VisionTransformer as ViT_normal
+from ImageReward_models.vit_adaln import VisionTransformer as ViT_adaln
 from transformers import BertTokenizer
 
 import torch

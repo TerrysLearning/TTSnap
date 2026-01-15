@@ -12,7 +12,9 @@ from lr_scheduler import get_scheduler
 from peft import get_peft_model, LoraConfig, TaskType
 from dataset import *
 from torch.utils.data import DataLoader
-from inference import ImageReward_Model
+from imagereward import ImageReward_Model
+from pickscore import PickScore_Model
+from hps import HPS_Model
 from utils import * 
 from eval import evaluate, save_eval, stat
 from loss import compute_loss
@@ -23,11 +25,11 @@ from accelerate.utils import DistributedDataParallelKwargs
 from time import time
 from set_args import set_args
 import json
+from HPSv2.hpsv2.src.open_clip import get_tokenizer
 
 if __name__ == "__main__":
     config_dict, args_data, args_train, args_log = set_args()
     device = 'cuda'
-    config_model_path = "setup/config.yaml"
     
     seed = config_dict['seed']
     random.seed(seed)
@@ -36,7 +38,7 @@ if __name__ == "__main__":
 
     if args_log['use_wandb']:
         wandb_log = wandb.init(
-            project=args_log['project'],
+            project='TTSnap',
             name=args_log['name'],
             config=config_dict,
         )
@@ -52,6 +54,7 @@ if __name__ == "__main__":
         else:
             Dataset_Class = TerryDataset
         dataset = Dataset_Class(
+            reward_name=config_dict['reward_name'],
             data_type=data_type,
             data_config=args_data)
         dataloader = DataLoader(
@@ -73,14 +76,34 @@ if __name__ == "__main__":
     train_dataset, train_loader = setup_dataset('train', batch_size=batch_size_train, use_pair=use_pair)
     valid_dataset, valid_loader = setup_dataset('valid', batch_size=args_train['batch_size'], use_pair=use_pair)
    
-
     # setup the model
-    model = ImageReward_Model(config_model_path, args_train['vit_type'], device).to(device)
-    state_dict = torch.load(args_train['base_model_path'], map_location=device)
+    if config_dict['reward_name'] == 'imr':
+        model = ImageReward_Model("setup/config.yaml", args_train['vit_type'])
+        state_dict = torch.load(args_train['base_model_path'], map_location="cpu")
+        missing, unexpected = model.load_state_dict(state_dict, strict=False)
+        model.to(device)
+        print("missing & unexpected keys:", missing, unexpected)
+
+    elif config_dict['reward_name'] == 'pick':
+        model = PickScore_Model.from_pretrained("yuvalkirstain/PickScore_v1")
+        if args_train['base_model_path'] != "yuvalkirstain/PickScore_v1":
+            state_dict = torch.load(args_train['base_model_path'], map_location="cpu")
+            missing, unexpected = model.load_state_dict(state_dict, strict=False)
+            print("missing & unexpected keys:", missing, unexpected)
+        model.to(device)    
+        model.processor = CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14")
     
-    missing, unexpected = model.load_state_dict(state_dict, strict=False)
-    print("missing keys:", missing)
-    print("unexpected keys:", unexpected)
+    elif config_dict['reward_name'] == 'hps':
+        model = HPS_Model(device) # hps model is warped inside HPS_Model
+        model.processor = get_tokenizer('ViT-H-14')
+        state_dict = torch.load(args_train["base_model_path"], map_location='cpu')
+        missing, unexpected = model.model.load_state_dict(state_dict, strict=False)
+        model.model.to(device)
+        print("missing & unexpected keys:", missing, unexpected)
+    
+    else: 
+        raise NotImplementedError(f"Reward model {config_dict['reward_name']} not implemented.")
+
     model.requires_grad_(True)
 
     ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
@@ -144,11 +167,10 @@ if __name__ == "__main__":
             print("Training for time step:", time_id.item())
             print("Initial learning rate for this time step:", lr_start)
         
-        # ///// Free the memory, otherwise OOM may happen
+        # Free the memory, otherwise OOM may happen
         if i > 0: 
             del optimizer, scheduler
             accelerator.free_memory()
-        # /////
 
         optimizer = torch.optim.AdamW(model.parameters(), 
                     lr=lr_start, 
@@ -168,9 +190,10 @@ if __name__ == "__main__":
         model.train()
         for epoch in range(args_train['curr_interval']):
             for step, batch_data in enumerate(train_loader):
-                batch_data['t_id'] = batch_time_id
-                batch_data['image'] = load_image_batch(train_dataset, batch_data['img_id'], batch_data['p_id'], batch_time_id, use_pair=use_pair)
-                    
+                batch_data['t_id'] = batch_time_id.to(device)
+                batch_data['image'] = load_image_batch(train_dataset, batch_data['img_id'], 
+                            batch_data['p_id'],  batch_data['t_id'], use_pair=use_pair).to(device)
+                
                 with accelerator.accumulate(model):
                     batch_pred = model(batch_data)
                     loss, loss_list = compute_loss(batch_pred, batch_data, args_train)
@@ -198,18 +221,18 @@ if __name__ == "__main__":
                         wandb_log.log({
                             f"learning rate": scheduler.get_last_lr()[0],
                         })
-                    print(f'epoch: {epochs_pass}, step {step+1}: lr', scheduler.get_last_lr()[0])
+                    # print(f'epoch: {epochs_pass}, step {step+1}: lr', scheduler.get_last_lr()[0])
 
             epochs_pass += 1
             if args_log['do_valid'] and (epochs_pass) % args_log['valid_every_epoch'] == 0:
                 history = validate(valid_loader, history, t_target= time_id, message="valid", epoch=epoch)
 
-            if accelerator.is_main_process and args_log['save_checkpoint']:
-                state_dict = accelerator.get_state_dict(model)
-                save_ckpt_dir = os.path.join(args_log['checkpoint_dir'], args_log['name'])
-                os.makedirs(save_ckpt_dir, exist_ok=True)
-                torch.save(state_dict, f'{save_ckpt_dir}/Ct{time_id.item()}.pt')
-                print("saved the checkpoint to", f'{save_ckpt_dir}/Ct{time_id.item()}.pt')
+            # if accelerator.is_main_process and args_log['save_checkpoint']:
+            #     state_dict = accelerator.get_state_dict(model)
+            #     save_ckpt_dir = os.path.join(args_log['checkpoint_dir']+'_'+ config_dict['reward_name'], args_log['name'])
+            #     os.makedirs(save_ckpt_dir, exist_ok=True)
+            #     torch.save(state_dict, f'{save_ckpt_dir}/Ct{time_id.item()}.pt')
+            #     print("saved the checkpoint to", f'{save_ckpt_dir}/Ct{time_id.item()}.pt')
             
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()

@@ -16,10 +16,6 @@ def mse_loss_fn(pred, gt):
     loss = F.mse_loss(pred, gt, reduction='mean')
     return loss
 
-def conf_loss_fn(uncertainty_pred, conf_target):
-    loss = F.mse_loss(uncertainty_pred, conf_target, reduction='mean')
-    return loss
-
 
 def preference_loss_fn(pred, tau=0.1):
     # make batch_data score gt into pair [B/2, 2]
@@ -37,9 +33,8 @@ def preference_loss_fn(pred, tau=0.1):
 def compute_loss(batch_pred, batch_data, args_train, **kwargs):
     device = batch_pred['reward_pred'].device # should be cuda
     loss = torch.tensor(0.0, device=device)
-    batch_data['reward_gt'] = batch_data['reward_gt'].to(device).unsqueeze(1)
-    reward_pred = batch_pred['reward_pred']  # [B, 1]
-    reward_gt = batch_data['reward_gt'] # [B, 1]
+    reward_pred = batch_pred['reward_pred']  # [B]
+    reward_gt = batch_data['reward_gt'] # [B]
 
     if args_train['bn_before_loss']:
         reward_pred = reward_pred - torch.mean(reward_pred)
@@ -49,7 +44,7 @@ def compute_loss(batch_pred, batch_data, args_train, **kwargs):
 
     loss_list = {} # each element is a list of one type of loss
     if args_train['loss_mse_scale'] > 0:
-        loss_mse = mse_loss_fn(reward_pred, reward_gt) #//////
+        loss_mse = mse_loss_fn(reward_pred, reward_gt)
         loss += args_train['loss_mse_scale'] * loss_mse
         loss_list['mse']= loss_mse
 

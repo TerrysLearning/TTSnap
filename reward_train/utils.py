@@ -56,7 +56,6 @@ def init_tokenizer():
     tokenizer.enc_token_id = tokenizer.additional_special_tokens_ids[0]  
     return tokenizer
 
-
 def save_model(model, name):
     save_path = os.path.join('checkpoints', name)
     torch.save(model.state_dict(), save_path)

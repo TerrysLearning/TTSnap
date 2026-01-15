@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import json
 from scipy.stats import kendalltau
 
-
 # ------ Evaluation Functions ------
 def top_select_eval(pred, gt, alpha):
     # pred and gt are arrays of two scores 
