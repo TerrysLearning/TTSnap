@@ -74,7 +74,7 @@ You can also use only part of data to train by modifying: *train_prompt_range*, 
 
 The ground truth reward of training and validation data is listed in reward_train/setup.py 
 
-To train the image-reward model:
+Commands for training: 
 ```
 cd reward_train
 accelerate launch --num_processes=<Number of your GPUs> train_cur.py \
