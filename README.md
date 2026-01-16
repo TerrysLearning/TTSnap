@@ -6,11 +6,9 @@ We increase the efficiency of global search method for Test Time Scaling on Text
 
 ## 1. Generate Data
 
-Given a set of prompts saved in json file, we generate images per-prompt using NegToMe. 
+Given a set of text prompts, we generate training data by sampling from the diffusion model and storing the intermediate Tweedie-estimated images.
 
-NegToMe increases the diversity of the images.
-
-The code is modified from  https://github.com/1jsingh/negtome
+We use [NegToMe](https://github.com/1jsingh/negtome) increases the diversity of the images.
 
 The generated datafile structure is like: 
 ```
@@ -48,10 +46,9 @@ python gen_flux.py
 
 We use our self-distillation strategy to finetune the reward model.
 
-Given the datafolder of the generated images, their prompts and their reward values, we train the noise-aware reward model for each inference step.
-
-![Figure description](doc/figure-1.png)
-
+To train the noise-aware reward models, we introduce a curriculum self-distillation strategy that gradually shifts the training domain from clean images to increasingly noisy ones.
+After one epoch at each noise level, we save the model weights and proceed to the next, ensuring small domain gaps and stable, efficient training.
+![Noise-Aware Finetuning](doc/figure-1.png)
 
 **Environment Setup:**
 ```
