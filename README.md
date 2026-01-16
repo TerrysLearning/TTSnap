@@ -50,6 +50,9 @@ We use our self-distillation strategy to finetune the reward model.
 
 Given the datafolder of the generated images, their prompts and their reward values, we train the noise-aware reward model for each inference step.
 
+![Figure description](figure-1.png)
+
+
 **Environment Setup:**
 ```
 conda create --n reward python=3.10.18
