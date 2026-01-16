@@ -67,17 +67,20 @@ Original reward model checkpoints before finetuning: [link](https://drive.google
 
 Reward checkpoints after finetuning: 
 
-**Run the code:** 
+**Training guidance:** 
 Modify the location of the datafolder and checkpoint path in the config file, e.g. c_flux.yaml. 
+
 You can also use only part of data to train by modifying: *train_prompt_range*,  *train_num_per_prompt*. 
+
+The ground truth reward of training and validation data is listed in reward_train/setup.py 
 
 To train the image-reward model:
 ```
-cd imr_train
+cd reward_train
 accelerate launch --num_processes=<Number of your GPUs> train_cur.py \
-    --c configs/c_flux.yaml \
+    --c configs/imr_flux.yaml \
     --name <name of your choice, for saving the outputs> \
-    --save_checkpoint  \ 
+    --<other commands you need> 
 ```
 Other arguments can be specified in the config file or add in the command lines
 

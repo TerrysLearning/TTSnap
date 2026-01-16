@@ -153,20 +153,3 @@ def load_image_batch(dataset: TerryDataset, img_id, p_id, t_id, use_pair=False):
         results = list(ex.map(load_fn, range(len(img_id))))
         images = torch.cat(results, dim=0)
     return images
-
-
-
-    
-# def load_feature_batch(img_id, p_id, feature_type='visual_feature'):
-#     # load image batch in parallel given time_step
-#     # they are torch tensors of length b
-#     features = []
-#     for i in range(len(img_id)):
-#         feature_path = os.path.join("gt_features", f"p{p_id[i].item():04d}_id{img_id[i].item():03d}.pt")
-#         feature = torch.load(feature_path)[feature_type][-1,0,:]
-#         feature = feature.reshape(-1, feature.shape[-1]) # [N, 1024] or [N, 768]
-#         features.append(feature) # [N, 1024]
-#     return torch.cat(features) # [B*N, 1024]
-    
-
-
