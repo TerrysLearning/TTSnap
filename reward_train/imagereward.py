@@ -49,7 +49,7 @@ class ImageReward_Model(nn.Module):
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
         
-        self.blip = BLIP_Pretrain(image_size=224, vit='large', med_config='setup/med_config.json', vit_type=vit_type)
+        self.blip = BLIP_Pretrain(image_size=224, vit='large', med_config='ImageReward_models/med_config.json', vit_type=vit_type)
         self.preprocess = _transform(config['BLIP']['image_size'])
         self.mlp = MLP(config['ImageReward']['mlp_dim'])
         self.tokenizer = init_tokenizer()

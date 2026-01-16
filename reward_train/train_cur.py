@@ -78,7 +78,7 @@ if __name__ == "__main__":
    
     # setup the model
     if config_dict['reward_name'] == 'imr':
-        model = ImageReward_Model("setup/config.yaml", args_train['vit_type'])
+        model = ImageReward_Model("ImageReward_models//config.yaml", args_train['vit_type'])
         state_dict = torch.load(args_train['base_model_path'], map_location="cpu")
         missing, unexpected = model.load_state_dict(state_dict, strict=False)
         model.to(device)
