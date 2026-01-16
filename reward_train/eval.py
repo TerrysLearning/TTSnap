@@ -34,19 +34,18 @@ def top_select_eval_M(pred, gt):
     return np.mean(top_accs), np.mean(top_gaps)
 
 
-def evaluate(model, dataloader, t_target, args_train, message="Evaluating", **kwargs):
+def evaluate(model, dataloader, t_target, message="Evaluating", device="cuda"):
     model.eval()
 
     eval_times = []
     eval_prompts = []
     eval_preds = []
     eval_gts = []
-    eval_stds = []
     with torch.no_grad():
         for t_id in t_target.tolist():
             for batch_data in tqdm(dataloader, desc=message+' time_id = '+str(t_id)):
-                t_id_batch = torch.tensor([t_id]*len(batch_data['img_id']))
-                batch_data['image'] = load_image_batch(dataloader.dataset, batch_data['img_id'], batch_data['p_id'], t_id_batch).to(model.device)
+                t_id_batch = torch.tensor([t_id]*len(batch_data['img_id'])).to(device)
+                batch_data['image'] = load_image_batch(dataloader.dataset, batch_data['img_id'], batch_data['p_id'], t_id_batch).to(device)
                 batch_data['t_id'] = t_id_batch
                 batch_pred = model(batch_data)
                 reward_pred = batch_pred['reward_pred']

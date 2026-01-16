@@ -115,8 +115,8 @@ if __name__ == "__main__":
 
     def validate(dataloader, history, t_target, message="valid", epoch=0):
         model.eval()
-        eval_t, eval_p, eval_pred, eval_gt = evaluate(model, dataloader, t_target, args_train, 
-                            message=message)
+        eval_t, eval_p, eval_pred, eval_gt = evaluate(model, dataloader, t_target, 
+                            message=message, device=device)
 
         eval_t = accelerator.gather_for_metrics(eval_t)
         eval_p = accelerator.gather_for_metrics(eval_p)
@@ -208,7 +208,7 @@ if __name__ == "__main__":
                 if accelerator.is_main_process:
                     if step_count % args_log['print_loss_every_iter'] == 0:
                         # gather losses from all GPUs, then average
-                        print(f"epoch: {epochs_pass}, step {step+1}: loss {loss.item():.4f}")
+                        print(f"epoch: {epochs_pass}, step {step+1}: loss {loss.item():.8f}")
 
                     if args_log['use_wandb']:
                         for key, value in loss_list.items():
