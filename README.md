@@ -47,7 +47,7 @@ To train the noise-aware reward models, we introduce a curriculum self-distillat
 After one epoch at each noise level, we save the model weights and proceed to the next, ensuring small domain gaps and stable, efficient training.
 ![Noise-Aware Finetuning](doc/figure-1.png)
 
-### Environment
+### Environment:
 ```
 conda create --n reward python=3.10.18
 pip install image-reward
@@ -59,13 +59,13 @@ pip install accelerate
 pip install clint ftfy
 ```
 
-### Checkpoints
+### Checkpoints:
 Original reward model checkpoints before finetuning: [link](https://drive.google.com/drive/folders/1Vzlba2rBCAEi9rUG_wrmttIfKGaLE1mk?usp=drive_link)
 
 Reward checkpoints after finetuning: 
 
 
-### Training guidance 
+### Training Guidance: 
 Modify the location of the datafolder and checkpoint path in the config file, e.g. c_flux.yaml. 
 
 You can also use only part of data to train by modifying: *train_prompt_range*,  *train_num_per_prompt*. 
@@ -87,10 +87,10 @@ Other arguments can be specified in the config file or add in the command lines
 
 To avoid the prohibitive computational cost of real-time image generation during testing, we adopt an **offline simulation protocol**. This approach allows for **rapid** and **statistically robust** evaluation of various Test-Time Scaling (TTS) strategies by utilizing a pre-computed image pool.
 
-### Reward Matrix Pre-computation
-We first generate an extensive image pool on the validation set. For each prompt, we record multiple generation trajectories and compute their corresponding reward values. This results in a reward tensor with the following dimensions: (*prompts_number*, *image_number_per_prompt*, *timestep_number*)
+### Reward Matrix Pre-computation:
+We first generate an large image pool on the validation set. For each prompt, we record multiple generation trajectories and compute their corresponding reward values. This results in a reward tensor with the following dimensions: (*prompts_number*, *image_number_per_prompt*, *timestep_number*)
 
-### Simulation Workflow
+### Simulation Workflow:
 The simulation operates on the fixed reward matrix rather than performing actual denoising. 
 
 We use **Monte Carlo Sampling:**: randomly subsets trajectories from the pool to simulate real-world inference and evaluate performance. 
@@ -98,6 +98,7 @@ We use **Monte Carlo Sampling:**: randomly subsets trajectories from the pool to
 Advantages: 
 - Ensures fairness by testing and comparing various **algorithms alternatives** and **different computation budgets** against a consistent, deterministic set of candidate samples trajectories.
 - Rapid evaluations and Statistical robustness. 
+
 
 ## 4. Run TTSnap
 
