@@ -72,7 +72,8 @@ Modify the location of the datafolder and checkpoint path in the config file, e.
 
 You can also use only part of data to train by modifying: *train_prompt_range*,  *train_num_per_prompt*. 
 
-The ground truth reward of training and validation data is listed in reward_train/setup.py 
+The prompts and the ground truth rewards of training and validation data is listed in reward_train/setup. 
+Prompts are from imagereward training set. 
 
 Commands for training: 
 ```
@@ -85,7 +86,11 @@ accelerate launch --num_processes=<Number of your GPUs> train_cur.py \
 Other arguments can be specified in the config file or add in the command lines
 
 ## 3. Run the TTSnap Simulation
-This part is to test and compare the performance TTSnap under the same set of generate trajectories.  
+The objective of simulation to test and compare the TTS performance of different settings under the same set of generate trajectories.  
+ 
+The reward computed for each prompt, each image and each timestep with/without NAFT are saved in simulation/values.
+The prompts are from the imagereward validation set. 
+In our validation process, we uses 200 prompts and 200 images each prompt with 20 timesteps. 
 
 ## 4. Run TTSnap
 
