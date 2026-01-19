@@ -9,11 +9,6 @@ def random_mask(n, m):
     mask[true_indices] = True
     return mask
 
-# def select_images(r, n, mask=None):
-#     # r: num_prompts * num_images * num_steps
-#     new_r = r[:, mask, :] if mask is not None else r[:, :n, :]
-#     return new_r
-
 def evaluate(budgets, rs, rs_base):
     # rs: PTTS
     # rs_base: TTS
@@ -53,7 +48,7 @@ class Simulation():
     # ----- The TTS Best of N selection baseline -----
     def bon(self, r_gt):
         # r_gt: [num_prompts * num_images]
-        return r_gt.max(axis=1).mean().item()
+        return r_gt.max(axis=1).mean().item(), r_gt.argmax(axis=1) 
 
     def bon_budget(self):
         # of one image selection
@@ -61,17 +56,18 @@ class Simulation():
 
     def bon_run(self, r_gt, image_num_use, iters=10):
         # r_gt: [num_prompts * num_images(all)] 
-        out_tts = []
+        out_rewards = []
         image_num_all = r_gt.shape[1]
         # run mutliple iters for averaging
         for i in range(iters):
-            if iters == 1:
-                r_gt_select = r_gt[:, :image_num_use]
-            else:
-                mask = random_mask(image_num_all, image_num_use)
-                r_gt_select = r_gt[:, mask]
-            out_tts.append(self.bon(r_gt_select))
-        return np.mean(out_tts).item()
+            mask = random_mask(image_num_all, image_num_use)
+            r_gt_select = r_gt[:, mask]
+            out_reward, out_ids = self.bon(r_gt_select)
+            out_rewards.append(out_reward)
+        if iters == 1:
+            return out_reward, out_ids
+        else:
+            return np.mean(out_rewards).item(), None
     
 
     # ----- The TTSp / TTSnap selection -----
@@ -113,23 +109,13 @@ class Simulation():
         assert (steps_use==np.sort(steps_use)).all(), "Steps must be in ascending order."
         assert len(alpha_s) == len(steps_use), "Length of alpha_s and steps_use must match."
         image_num_all = r.shape[1]
-        random_mask = random_mask(image_num_all, image_num_use)
-        r_select = r[:, random_mask, :]
-        for iter in range(iters):
-            return
-        return 
-
-
-
-        # out_ptts_m = []
-        # for r_mid in r_mid_all_s:
-        #     assert len(r_mid) == len(r_gt_all)
-        # for i in range(iters):
-        #     if iters == 1 :
-        #         mask = None
-        #     else:
-        #         mask = random_mask(n_max, n)
-        #     r_mid_s = select_n_r_mul(r_mid_all_s, n, mask)
-        #     r_gt = select_n_r(r_gt_all, n, mask)
-        #     out_ptts_m.append(self.ttsp(r_mid_s, r_gt, a_s))
-        # return np.mean(out_ptts_m).item()
+        out_rewards = []
+        for i in range(iters):
+            random_mask = random_mask(image_num_all, image_num_use)
+            r_select = r[:, random_mask, :]
+            out_reward, out_ids = self.ttsp(r_select, alpha_s, steps_use)
+            out_rewards.append(out_reward)
+        if iters == 1:
+            return out_reward, out_ids
+        else:
+            return np.mean(out_rewards).item(), None
