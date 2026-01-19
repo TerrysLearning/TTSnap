@@ -47,7 +47,7 @@ To train the noise-aware reward models, we introduce a curriculum self-distillat
 After one epoch at each noise level, we save the model weights and proceed to the next, ensuring small domain gaps and stable, efficient training.
 ![Noise-Aware Finetuning](doc/figure-1.png)
 
-**Environment Setup:**
+### Environment
 ```
 conda create --n reward python=3.10.18
 pip install image-reward
@@ -59,12 +59,13 @@ pip install accelerate
 pip install clint ftfy
 ```
 
-**Checkpoints download**
+### Checkpoints
 Original reward model checkpoints before finetuning: [link](https://drive.google.com/drive/folders/1Vzlba2rBCAEi9rUG_wrmttIfKGaLE1mk?usp=drive_link)
 
 Reward checkpoints after finetuning: 
 
-**Training guidance:** 
+
+### Training guidance 
 Modify the location of the datafolder and checkpoint path in the config file, e.g. c_flux.yaml. 
 
 You can also use only part of data to train by modifying: *train_prompt_range*,  *train_num_per_prompt*. 
@@ -82,30 +83,21 @@ accelerate launch --num_processes=<Number of your GPUs> train_cur.py \
 ```
 Other arguments can be specified in the config file or add in the command lines
 
-## 3. Run the TTSnap Simulation
+## 3. Run the TTSnap Offline Simulation
 
 To avoid the prohibitive computational cost of real-time image generation during testing, we adopt an **offline simulation protocol**. This approach allows for **rapid** and **statistically robust** evaluation of various Test-Time Scaling (TTS) strategies by utilizing a pre-computed image pool.
 
 ### Reward Matrix Pre-computation
 We first generate an extensive image pool on the validation set. For each prompt, we record multiple generation trajectories and compute their corresponding reward values. This results in a reward tensor with the following dimensions: (*prompts_number*, *image_number_per_prompt*, *timestep_number*)
 
+### Simulation Workflow
+The simulation operates on the fixed reward matrix rather than performing actual denoising. 
 
-Given a pool of images generated on the validation set, we can compute rewards values of shape 
-Then we can run the test-time scaling simulation on these reward values.  
+We use **Monte Carlo Sampling:**: randomly subsets trajectories from the pool to simulate real-world inference and evaluate performance. 
 
-In the simulation: 
-- Given these fix set of generation trajectories.
-- image_number_per_prompt is a large number e.g. 200
-- random take some as trajectories and do TTS
-
-The objective of simulation: 
-- Fair comparision performance on the same set of generate trajectories.
-- So we can find better configritions and fair performance with other settings
-- To mitigate randomness, need run generation many times, but this is very costive. each time one generation 
- 
-The reward computed for each prompt, each image and each timestep with/without NAFT are saved in simulation/values.
-The prompts are from the imagereward validation set. 
-In our validation process, we uses 200 prompts and 200 images each prompt with 20 timesteps. 
+Advantages: 
+- Ensures fairness by testing and comparing various **algorithms alternatives** and **different computation budgets** against a consistent, deterministic set of candidate samples trajectories.
+- Rapid evaluations and Statistical robustness. 
 
 ## 4. Run TTSnap
 
