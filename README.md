@@ -32,13 +32,10 @@ The generated datafile structure is like:
 ```
 
 The code for generate the flux and sdxl data are in 'data/gen_flux.py' and 'data/gen_sdxl.py'.
-
-**Environment Setup:**
 ```
+# Environment Setup
 pip install diffusers
-```
-**Run the code:** 
-```
+# Run the code
 python gen_flux.py
 ```
 
