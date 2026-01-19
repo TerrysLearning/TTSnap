@@ -86,7 +86,25 @@ accelerate launch --num_processes=<Number of your GPUs> train_cur.py \
 Other arguments can be specified in the config file or add in the command lines
 
 ## 3. Run the TTSnap Simulation
-The objective of simulation to test and compare the TTS performance of different settings under the same set of generate trajectories.  
+
+To avoid the prohibitive computational cost of real-time image generation during testing, we adopt an **offline simulation protocol**. This approach allows for **rapid** and **statistically robust** evaluation of various Test-Time Scaling (TTS) strategies by utilizing a pre-computed image pool.
+
+### Reward Matrix Pre-computation
+We first generate an extensive image pool on the validation set. For each prompt, we record multiple generation trajectories and compute their corresponding reward values. This results in a reward tensor with the following dimensions: (*prompts_number*, *image_number_per_prompt*, *timestep_number*)
+
+
+Given a pool of images generated on the validation set, we can compute rewards values of shape 
+Then we can run the test-time scaling simulation on these reward values.  
+
+In the simulation: 
+- Given these fix set of generation trajectories.
+- image_number_per_prompt is a large number e.g. 200
+- random take some as trajectories and do TTS
+
+The objective of simulation: 
+- Fair comparision performance on the same set of generate trajectories.
+- So we can find better configritions and fair performance with other settings
+- To mitigate randomness, need run generation many times, but this is very costive. each time one generation 
  
 The reward computed for each prompt, each image and each timestep with/without NAFT are saved in simulation/values.
 The prompts are from the imagereward validation set. 

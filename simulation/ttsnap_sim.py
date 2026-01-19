@@ -14,7 +14,6 @@ def random_mask(n, m):
 #     new_r = r[:, mask, :] if mask is not None else r[:, :n, :]
 #     return new_r
 
-
 def evaluate(budgets, rs, rs_base):
     # rs: PTTS
     # rs_base: TTS
@@ -56,31 +55,33 @@ class Simulation():
         # r_gt: [num_prompts * num_images]
         return r_gt.max(axis=1).mean().item()
 
-    def bon_budget(self, n):
-        # n is the number of images
-        return n * (self.max_step * self.x + self.y)
+    def bon_budget(self):
+        # of one image selection
+        return self.max_step * self.x + self.y
 
-    def bon_run(self, r_gt, image_num_use, image_num_all, iters=10):
-        # r_gt: [num_prompts * num_images]
+    def bon_run(self, r_gt, image_num_use, iters=10):
+        # r_gt: [num_prompts * num_images(all)] 
         out_tts = []
+        image_num_all = r_gt.shape[1]
+        # run mutliple iters for averaging
         for i in range(iters):
             if iters == 1:
-                r_gt_select = r_gt[:image_num_use, :]
+                r_gt_select = r_gt[:, :image_num_use]
             else:
                 mask = random_mask(image_num_all, image_num_use)
-                r_gt_select = r_gt[mask, :]
+                r_gt_select = r_gt[:, mask]
             out_tts.append(self.bon(r_gt_select))
         return np.mean(out_tts).item()
     
+
     # ----- The TTSp / TTSnap selection -----
+    # steps use : list of steps to use (exclude the final step, which is gt, starting from 0)
+    # alpha_s: list of alphas to use 
+    # r: [num_prompts , num_images, num_steps]  
+
     def ttsp(self, r, alpha_s, steps_use):
-        # r: [num_prompts , num_images, num_steps]
-        # step_use : list of steps to use (exclude the final step, which is gt)
-        # alpha_s: list of alphas to use 
-        assert (steps_use==np.sort(steps_use)).all(), "Steps must be in ascending order."
-        assert len(alpha_s) == len(steps_use), "Length of alpha_s and steps_use must match."
         n_p, n_i, n_s = r.shape # num_prompts, num_images, num_steps
-        # pruning at each timestep, mask get smaller and smaller
+        # pruning at each timestepw
         mask = np.full((n_p, n_i), True, dtype=bool) # [n_p, n_i]
         image_ids = np.tile(np.arange(n_i), (n_p, 1)) # [n_p, n_i]
         for i, step in enumerate(steps_use): 
@@ -96,32 +97,30 @@ class Simulation():
         max_ids = image_ids[np.arange(n_p),r_gt.argmax(axis=1)] # [n_p] 
         return max_values.mean().item(), max_ids
             
-    def ttsp_budget(self, n, a_s, steps):
-        ds = []
-        for step in steps:
-            ds.append(step + 1)
-        c = 0 
+    def ttsp_budget(self, alpha_s, steps_use):
+        # of one image selection
+        cost = 0 
         alpha_cum = 1 
-        for j, d in enumerate(ds):
-            if j == 0:
-                c += d * self.x + self.y
-                alpha_cum *= a_s[j]
-            else:
-                prev_d = ds[j - 1]
-                c += (alpha_cum * (d - prev_d) * self.x + alpha_cum * self.y)
-                alpha_cum *= a_s[j]
-        c += (self.max_step - ds[-1]) * alpha_cum * self.x + alpha_cum * self.y
-        return c * n
+        prev_step = 0 
+        for j, s in enumerate(steps_use):
+            cost += alpha_cum * ((s - prev_step) * self.x + self.y)
+            alpha_cum *= alpha_s[j]
+            prev_step = s
+        cost += alpha_cum * ((self.max_step - 1 - prev_step) * self.x + self.y)
+        return cost 
     
-    def ttsp_many_times(self, r_mid_all_s, r_gt_all, a_s, n, n_max, iters=10):
-        # r_mid_all_s: list of all rewards at target steps : [dict]
-        # r_gt_all: all ground truth rewards : dict 
-        # a : alpha
-        # n : number of images to select
-        # steps : list of steps to use
-        # iters : number of iterations to average over
-        'To be updated'
+    def ttsp_run(self, r, image_num_use, alpha_s, steps_use, iters=10):
+        assert (steps_use==np.sort(steps_use)).all(), "Steps must be in ascending order."
+        assert len(alpha_s) == len(steps_use), "Length of alpha_s and steps_use must match."
+        image_num_all = r.shape[1]
+        random_mask = random_mask(image_num_all, image_num_use)
+        r_select = r[:, random_mask, :]
+        for iter in range(iters):
+            return
         return 
+
+
+
         # out_ptts_m = []
         # for r_mid in r_mid_all_s:
         #     assert len(r_mid) == len(r_gt_all)
