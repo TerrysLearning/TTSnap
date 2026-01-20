@@ -22,18 +22,12 @@
 </p>
 
 <div align="center">
-<table>
-  <tr>
-    <td><img src="doc/imgs/ttsnap_imr_single_reward_curve.png" width="33.3%"></td>
-    <td><img src="doc/imgs/ttsnap_pic_single_reward_curve.png" width="33.3%"></td>
-    <td><img src="doc/imgs/ttsnap_hps_single_reward_curve.png" width="33.3%"></td>
-  </tr>
-  <tr>
-    <td><img src="doc/imgs/ttsnap_imr_multiple_reward_curve.png" width="33.3%"></td>
-    <td><img src="doc/imgs/ttsnap_pic_multiple_reward_curve.png" width="33.3%"></td>
-    <td><img src="doc/imgs/ttsnap_hps_multiple_reward_curve.png" width="33.3%"></td>
-  </tr>
-</table>
+    <img src="doc/imgs/ttsnap_imr_single_reward_curve.png" width="33.3%"/>
+    <img src="doc/imgs/ttsnap_pic_single_reward_curve.png" width="33.3%"/>
+    <img src="doc/imgs/ttsnap_hps_single_reward_curve.png" width="33.3%"/>
+    <img src="doc/imgs/ttsnap_imr_multiple_reward_curve.png" width="33.3%"/>
+    <img src="doc/imgs/ttsnap_pic_multiple_reward_curve.png" width="33.3%"/>   
+    <img src="doc/imgs/ttsnap_hps_multiple_reward_curve.png" width="33.3%"/>
 </div>
 
 The official implementation of TTSnap.
