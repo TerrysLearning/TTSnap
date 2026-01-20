@@ -23,6 +23,15 @@ class Simulation():
         # of one image selection
         return self.max_step * self.x + self.y
 
+    def bon_multi(self, r_gt):
+        n_p, n_i, n_obj = r_gt.shape
+        # argsort() gives the order, the second argsort() gives the rank position
+        ranks = r_gt.argsort(axis=1).argsort(axis=1) # [n_p, n_i, n_obj]   
+        rank_sum = ranks.sum(axis=2) # [n_p, n_i]
+        max_ids = rank_sum.argmax(axis=1) # [n_p]
+        best_rewards = r_gt[np.arange(n_p), max_ids] # [n_p, n_obj]        
+        return best_rewards.mean(axis=0), max_ids
+
     def bon_run(self, r_gt, image_num_use, iters=10, use_multi=False):
         # r_gt: [num_prompts * num_images(all)] 
         # if use_multi is True, r_gt: [num_prompts, num_images(all), num_objectives]
@@ -41,16 +50,9 @@ class Simulation():
         if iters == 1:
             return out_reward, out_ids
         else:
-            return np.mean(out_rewards).item(), None
+            return np.mean(out_rewards, axis=0), None
     
-    def bon_multi(self, r_gt):
-        n_p, n_i, n_obj = r_gt.shape
-        # argsort() gives the order, the second argsort() gives the rank position
-        ranks = r_gt.argsort(axis=1).argsort(axis=1) # [n_p, n_i, n_obj]   
-        rank_sum = ranks.sum(axis=2) # [n_p, n_i]
-        max_ids = rank_sum.argmax(axis=1) # [n_p]
-        best_rewards = r_gt[np.arange(n_p), max_ids] # [n_p, n_obj]        
-        return best_rewards.mean(axis=0), max_ids
+
 
     # ----- The TTSp / TTSnap selection -----
     # steps use : list of steps to use (exclude the final step, which is gt, starting from 0)
@@ -123,10 +125,10 @@ class Simulation():
         
         # final timestep selection
         r_gt = r[:, :, -1, :][mask].reshape(n_p, -1, n_obj) # [n_p, current_num_images, n_obj]
-        final_ranks = r_gt.argsort(axis=1).argsort(axis=1).sum(axis=-1)
-        best_inner_idx = final_ranks.argmax(axis=1)
-        max_ids = image_ids[np.arange(n_p), best_inner_idx]
-        avg_reward = r_gt[np.arange(n_p), best_inner_idx].mean(axis=0).item()
+        final_ranks = r_gt.argsort(axis=1).argsort(axis=1).sum(axis=-1) # [n_p, current_num_images]
+        best_inner_idx = final_ranks.argmax(axis=1) # [n_p]
+        max_ids = image_ids[np.arange(n_p), best_inner_idx] # [n_p]
+        avg_reward = r_gt[np.arange(n_p), best_inner_idx].mean(axis=0) # [n_obj]
         return avg_reward, max_ids
 
     def ttsp_run(self, r, image_num_use, alpha_s, steps_use, iters=10, use_multi=False):
@@ -146,4 +148,4 @@ class Simulation():
         if iters == 1:
             return out_reward, out_ids
         else:
-            return np.mean(out_rewards).item(), None
+            return np.mean(out_rewards, axis=0), None
