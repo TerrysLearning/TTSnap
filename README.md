@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://arxiv.org/pdf/2511.22242">📃 Arxiv</a> &ensp;
+  <a href="https://arxiv.org/pdf/2511.22242">📃 Paper</a> &ensp;
 </p>
 
 
