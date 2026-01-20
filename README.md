@@ -24,14 +24,14 @@
 <div align="center">
 <table>
   <tr>
-    <td><img src="doc/imgs/ttsnap_imr_single_reward_curve.png" width="220"></td>
-    <td><img src="doc/imgs/ttsnap_pic_single_reward_curve.png" width="220"></td>
-    <td><img src="doc/imgs/ttsnap_hps_single_reward_curve.png" width="220"></td>
+    <td><img src="doc/imgs/ttsnap_imr_single_reward_curve.png" width="250"></td>
+    <td><img src="doc/imgs/ttsnap_pic_single_reward_curve.png" width="250"></td>
+    <td><img src="doc/imgs/ttsnap_hps_single_reward_curve.png" width="250"></td>
   </tr>
   <tr>
-    <td><img src="doc/imgs/ttsnap_imr_multiple_reward_curve.png" width="220"></td>
-    <td><img src="doc/imgs/ttsnap_pic_multiple_reward_curve.png" width="220"></td>
-    <td><img src="doc/imgs/ttsnap_hps_multiple_reward_curve.png" width="220"></td>
+    <td><img src="doc/imgs/ttsnap_imr_multiple_reward_curve.png" width="250"></td>
+    <td><img src="doc/imgs/ttsnap_pic_multiple_reward_curve.png" width="250"></td>
+    <td><img src="doc/imgs/ttsnap_hps_multiple_reward_curve.png" width="250"></td>
   </tr>
 </table>
 </div>
