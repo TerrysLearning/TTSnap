@@ -1,4 +1,17 @@
-# TTSnap
+<h1 align="center"> TTSnap: Test-Time Scalinge with Noise-Aware Pruning </h1>
+
+<p align="center">
+  <a href="https://terryslearning.github.io/" target="_blank">Qingtao&nbsp;Yu</a><sup>1</sup> &ensp; <b>&middot;</b> &ensp;
+  <a href="https://charliesong1999.github.io/" target="_blank">Changlin&nbsp;Song</a><sup>1</sup> &ensp; <b>&middot;</b> &ensp;
+  <span>Minghao&nbsp;Sun</span><sup>1</sup> &ensp; <b>&middot;</b> &ensp;
+</p>
+
+<p align="center">
+  <sup>1</sup> Australian National University &emsp; <sup>2</sup>Data61-CSIRO &emsp; <sup>3</sup>New York University &emsp; <br>
+  <sub><sup>*</sup>Project Leads &emsp;</sub>
+</p>
+
+
 The official implementation of TTSnap.
 More and more will be updated soon. 
 
@@ -99,7 +112,7 @@ Advantages:
 - Ensures fairness by testing and comparing various **algorithms alternatives** and **different computation budgets** against a consistent, deterministic set of candidate samples trajectories.
 - Rapid evaluations and Statistical robustness. 
 
-Example (in ttsnap_single.ipynb): 
+Example (in simulation/ttsnap_single.ipynb, our pre-computed reward values are saved in simulation/values): 
 ```
 'Compare TTSnap, TTSp and Best-of-N'
 from ttsnap_sim import *
@@ -128,10 +141,11 @@ print('Averaged reward Best-of-N of all the prompts:', r_bon)
 print('Averaged reward TTsnap of all the prompts:', r_ttsp)
 ```
 
+TTSnap under multi-reward setting is in simulation/ttsnap_multi.ipynb
+
 ## 4. Run TTSnap
 
 **TODO:** 
-- [ ] release the code for TTSnap simulation
 - [ ] release the code for TTSnap run
 - [ ] link for trained checkpoints
 - [ ] link for data
