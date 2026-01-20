@@ -22,12 +22,8 @@
 </p>
 
 <div align="center">
-    <img src="doc/imgs/ttsnap_imr_single_reward_curve.png" width="33%"/>
-    <img src="doc/imgs/ttsnap_pic_single_reward_curve.png" width="33%"/>
-    <img src="doc/imgs/ttsnap_hps_single_reward_curve.png" width="33%"/>
-    <img src="doc/imgs/ttsnap_imr_multiple_reward_curve.png" width="33%"/>
-    <img src="doc/imgs/ttsnap_pic_multiple_reward_curve.png" width="33%"/>   
-    <img src="doc/imgs/ttsnap_hps_multiple_reward_curve.png" width="33%"/>
+    <img src="doc/imgs/ttsnap_imr_single_reward_curve.png" width="33%"/><img src="doc/imgs/ttsnap_pic_single_reward_curve.png" width="33%"/><img src="doc/imgs/ttsnap_hps_single_reward_curve.png" width="33%"/>
+    <img src="doc/imgs/ttsnap_imr_multiple_reward_curve.png" width="33%"/><img src="doc/imgs/ttsnap_pic_multiple_reward_curve.png" width="33%"/><img src="doc/imgs/ttsnap_hps_multiple_reward_curve.png" width="33%"/>
 </div>
 
 The official implementation of TTSnap.
