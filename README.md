@@ -159,6 +159,8 @@ TTSnap under multi-reward setting is in simulation/ttsnap_multi.ipynb
 
 ## 4. Run TTSnap
 
+To be updated ....
+
 **TODO:** 
 - [ ] release the code for TTSnap run
 - [ ] link for trained checkpoints
