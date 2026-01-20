@@ -1,5 +1,6 @@
 import numpy as np 
 from scipy import integrate
+from matplotlib import pyplot as plt
 
 # Helper Functions
 def random_mask(n, m):
@@ -37,7 +38,6 @@ def plot_curve(budgets, rewards_out1, rewards_out2):
     plt.show()
 
 
-
 # ---- Simulation Class -----
 class Simulation():
     def __init__(self, x, y, max_step=20):
@@ -50,7 +50,7 @@ class Simulation():
         # r_gt: [num_prompts * num_images]
         return r_gt.max(axis=1).mean().item(), r_gt.argmax(axis=1) 
 
-    def bon_budget(self):
+    def bon_cost(self):
         # of one image selection
         return self.max_step * self.x + self.y
 
@@ -81,19 +81,29 @@ class Simulation():
         mask = np.full((n_p, n_i), True, dtype=bool) # [n_p, n_i]
         image_ids = np.tile(np.arange(n_i), (n_p, 1)) # [n_p, n_i]
         for i, step in enumerate(steps_use): 
-            r_mid_all = r[:, :, step] # [n_p, n_i]
             r_mid = r[:, :, step][mask].reshape(n_p, -1) # [n_p, current_num_images]
-            topn = max(1, round(n_i * alpha_s[i]))
-            thresholds = np.partition(r_mid, -topn, axis=1)[:, -topn][:, None] # [n_p, 1] # threshold for top n selection
-            mask = mask & (r_mid_all >= thresholds) # [n_p, n_i] # update
-            image_ids = image_ids[r_mid >= thresholds].reshape(n_p, -1) # [n_p, rest_num_images]
+            topn = max(1, round(r_mid.shape[1] * alpha_s[i]))
+            
+            # thresholds = np.partition(r_mid, -topn, axis=1)[:, -topn][:, None] # [n_p, 1] # threshold for top n selection
+            # mask = mask & (r_mid_all >= thresholds) # [n_p, n_i] # update
+            # image_ids = image_ids[r_mid >= thresholds].reshape(n_p, -1) # [n_p, rest_num_images]
+
+            top_idx_in_rmid = np.argpartition(r_mid, -topn, axis=1)[:, -topn:]
+            # update the image ids
+            rows = np.arange(n_p)[:, None]
+            image_ids = image_ids[rows, top_idx_in_rmid] # [n_p, topn]
+            # update the global mask
+            new_sub_mask = np.zeros_like(r_mid, dtype=bool)
+            new_sub_mask[rows, top_idx_in_rmid] = True
+            mask[mask.copy()] = new_sub_mask.ravel()
+            
         # final timestep selection
         r_gt = r[:, :, -1][mask].reshape(n_p, -1) # [n_p, current_num_images]
         max_values = r_gt.max(axis=1) # [n_p]
         max_ids = image_ids[np.arange(n_p),r_gt.argmax(axis=1)] # [n_p] 
         return max_values.mean().item(), max_ids
             
-    def ttsp_budget(self, alpha_s, steps_use):
+    def ttsp_cost(self, alpha_s, steps_use):
         # of one image selection
         cost = 0 
         alpha_cum = 1 
@@ -111,8 +121,8 @@ class Simulation():
         image_num_all = r.shape[1]
         out_rewards = []
         for i in range(iters):
-            random_mask = random_mask(image_num_all, image_num_use)
-            r_select = r[:, random_mask, :]
+            mask = random_mask(image_num_all, image_num_use)
+            r_select = r[:, mask, :]
             out_reward, out_ids = self.ttsp(r_select, alpha_s, steps_use)
             out_rewards.append(out_reward)
         if iters == 1:
