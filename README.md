@@ -21,6 +21,7 @@
   <a href="https://arxiv.org/pdf/2511.22242">📃 Paper</a> &ensp;
 </p>
 
+<div align="center">
 <table>
   <tr>
     <td><img src="doc/imgs/ttsnap_imr_single_reward_curve.png" width="200"></td>
@@ -33,7 +34,7 @@
     <td><img src="doc/imgs/ttsnap_hps_multiple_reward_curve.png" width="200"></td>
   </tr>
 </table>
-
+</div>
 
 The official implementation of TTSnap.
 More and more will be updated soon. 
