@@ -26,10 +26,11 @@
     <img src="doc/imgs/ttsnap_imr_multiple_reward_curve.png" width="33%"/><img src="doc/imgs/ttsnap_pic_multiple_reward_curve.png" width="33%"/><img src="doc/imgs/ttsnap_hps_multiple_reward_curve.png" width="33%"/>
 </div>
 
-The official implementation of TTSnap.
-More and more will be updated soon. 
 
-We increase the efficiency of global search method for Test Time Scaling on Text to Image diffusion models, e.g. best-of-n. 
+We increase the efficiency of **global search** method for Test Time Scaling on Text to Image diffusion models, e.g. best-of-n. 
+By applying early-stage pruning, TTSnap can explore a much **larger number of candidates**, leading to the TTS outcome with **higher reward values** under the **given computational budget**. 
+
+More and more will be updated soon. 
 
 ## 1. Generate Data
 
