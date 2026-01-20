@@ -99,7 +99,7 @@ Advantages:
 - Ensures fairness by testing and comparing various **algorithms alternatives** and **different computation budgets** against a consistent, deterministic set of candidate samples trajectories.
 - Rapid evaluations and Statistical robustness. 
 
-Example: 
+Example (in ttsnap_single.ipynb): 
 ```
 'Compare TTSnap, TTSp and Best-of-N'
 from ttsnap_sim import *
@@ -114,20 +114,19 @@ S = Simulation(x=denoise_budget, y=verifier_budget, max_step=num_steps)
 
 # Best-of-N
 n = int(budget / S.bon_cost())
-print('Number of images used Best-of-N:', n)
+print('Number of images seen in Best-of-N:', n)
 r_bon, _ = S.bon_run(reward_base_all[:,:,-1], image_num_use=n, iters=iters)
 
 # TTsnap
 alphas = [0.4, 0.4, 0.5] # hyperparameters
 steps_use = [2, 6, 11] # hyperparameters
 n = int(budget / S.ttsp_cost(alpha_s=alphas, steps_use=steps_use))
-print('Number of images used TTsnap:', n)
+print('Number of images seen in TTsnap:', n)
 r_ttsp, _ = S.ttsp_run(reward_naft_all, image_num_use=n, alpha_s=alphas, steps_use=steps_use, iters=iters)
 
 print('Averaged reward Best-of-N of all the prompts:', r_bon)
 print('Averaged reward TTsnap of all the prompts:', r_ttsp)
 ```
-
 
 ## 4. Run TTSnap
 

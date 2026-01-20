@@ -1,6 +1,4 @@
 import numpy as np 
-from scipy import integrate
-from matplotlib import pyplot as plt
 
 # Helper Functions
 def random_mask(n, m):
@@ -9,33 +7,6 @@ def random_mask(n, m):
     true_indices = np.random.choice(n, size=m, replace=False)
     mask[true_indices] = True
     return mask
-
-def evaluate(budgets, rs, rs_base):
-    # rs: PTTS
-    # rs_base: TTS
-    assert len(budgets) == len(rs) == len(rs_base), "Lengths must match."
-    assert (np.arange(len(budgets))==np.argsort(budgets)).all(), "Budgets must be sorted in ascending order."
-    y0 = np.array(rs_base)[0]
-    y_rs = np.array(rs) - y0
-    y_rs_base = np.array(rs_base) - y0
-    area1 = integrate.simpson(y=y_rs, x=budgets)
-    area2 = integrate.simpson(y=y_rs_base, x=budgets)
-    difference = area1 - area2
-    increase = (area1 - area2) / area2 if area2 != 0 else float('inf')
-    difference = np.round(difference, 2)
-    increase = np.round(100*increase, 2)
-    return difference.item(), increase.item()
-
-# Plot the reward vs budget curves
-def plot_curve(budgets, rewards_out1, rewards_out2):
-    plt.plot(budgets, rewards_out1, label='PTTS', color='orange')
-    plt.plot(budgets, rewards_out2, label='TTS', color='blue', linestyle='--')
-    plt.xlabel('Budget (TFlops)')
-    plt.ylabel('Reward')
-    plt.title('Reward vs Budget Curve')
-    plt.legend()
-    plt.grid(linestyle='--', color='gray', alpha=0.7)
-    plt.show()
 
 
 # ---- Simulation Class -----
