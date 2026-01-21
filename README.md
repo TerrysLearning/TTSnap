@@ -1,4 +1,4 @@
-<h1 align="center"> TTSnap: Test-Time Scaling with Noise-Aware Pruning </h1>
+<h1 align="center"> TTSnap: Test-Time Scaling of Diffusion Models via Noise-Aware Pruning</h1>
 
 <p align="center">
   <a href="https://terryslearning.github.io/" target="_blank">Qingtao&nbsp;Yu</a><sup>1</sup> &ensp; <b>&middot;</b> &ensp;
