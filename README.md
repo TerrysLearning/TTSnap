@@ -158,7 +158,8 @@ print('Averaged reward TTsnap of all the prompts:', r_ttsp)
 
 TTSnap under multi-reward setting is in simulation/ttsnap_multi.ipynb
 
-## 4. Run TTSnap
+## 4. Use TTSnap for real-world application: 
+
 
 To be updated ....
 
